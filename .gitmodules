@@ -86,3 +86,6 @@
 	path = vendor/msf_gif
 	url = https://github.com/notnullnotvoid/msf_gif.git
 	shallow = true
+[submodule "vendor/zuo"]
+	path = vendor/zuo
+	url = https://github.com/Danl2620/zuo.git

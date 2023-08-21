@@ -29,6 +29,10 @@ extern tic_script_config SquirrelSyntaxConfig;
 extern tic_script_config SchemeSyntaxConfig;
 #endif
 
+#if defined(TIC_BUILD_WITH_ZUO)
+extern tic_script_config ZuoSyntaxConfig;
+#endif
+
 #if defined(TIC_BUILD_WITH_WREN)
 extern tic_script_config WrenSyntaxConfig;
 #endif
@@ -70,6 +74,10 @@ tic_script_config* Languages[] = {
 
     #if defined(TIC_BUILD_WITH_SCHEME)
 	&SchemeSyntaxConfig,
+	#endif
+
+    #if defined(TIC_BUILD_WITH_ZUO)
+	&ZuoSyntaxConfig,
 	#endif
 
 	#if defined(TIC_BUILD_WITH_SQUIRREL)

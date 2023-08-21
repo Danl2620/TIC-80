@@ -361,6 +361,28 @@ if (BAREMETALPI)
     target_compile_definitions(scheme PRIVATE S7_BAREMETALPI)
 endif()
 
+
+################################
+# SCHEME (Zuo)
+################################
+
+set(ZUO_DIR ${THIRDPARTY_DIR}/zuo)
+set(ZUO_SRC
+    ${ZUO_DIR}/zuo.c
+)
+
+add_library(zuo STATIC ${ZUO_SRC})
+set_target_properties(zuo PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(zuo PUBLIC ${ZUO_DIR})
+
+if (N3DS)
+    target_compile_definitions(zuo PRIVATE ZUO_N3DS)
+endif()
+
+if (BAREMETALPI)
+    target_compile_definitions(zuo PRIVATE ZUO_BAREMETALPI)
+endif()
+
 ################################
 # SQUIRREL
 ################################
@@ -556,6 +578,7 @@ macro(MACRO_CORE SCRIPT DEFINE BUILD_DEPRECATED)
         ${TIC80CORE_DIR}/api/squirrel.c
         ${TIC80CORE_DIR}/api/python.c
         ${TIC80CORE_DIR}/api/scheme.c
+        ${TIC80CORE_DIR}/api/zuo.c
         ${TIC80CORE_DIR}/api/mruby.c
         ${TIC80CORE_DIR}/api/janet.c
         ${TIC80CORE_DIR}/tic.c
@@ -631,6 +654,7 @@ if(BUILD_STUB)
     MACRO_CORE(squirrel     TIC_BUILD_WITH_SQUIRREL FALSE)
     MACRO_CORE(python       TIC_BUILD_WITH_PYTHON   FALSE)
     MACRO_CORE(scheme       TIC_BUILD_WITH_SCHEME   FALSE)
+    MACRO_CORE(zuo          TIC_BUILD_WITH_ZUO      FALSE)
     MACRO_CORE(wasm         TIC_BUILD_WITH_WASM     FALSE)
 
     if(BUILD_WITH_MRUBY)
@@ -1406,6 +1430,7 @@ if(BUILD_STUB)
     MACRO_STUB(squirrel)
     MACRO_STUB(python)
     MACRO_STUB(scheme)
+    MACRO_STUB(zuo)
 
     if(BUILD_WITH_JANET)
         MACRO_STUB(janet)

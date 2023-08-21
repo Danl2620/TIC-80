@@ -28,6 +28,7 @@
     !defined(TIC_BUILD_WITH_JS)       && \
     !defined(TIC_BUILD_WITH_WREN)     && \
     !defined(TIC_BUILD_WITH_SCHEME)   && \
+    !defined(TIC_BUILD_WITH_ZUO)      && \
     !defined(TIC_BUILD_WITH_SQUIRREL) && \
     !defined(TIC_BUILD_WITH_PYTHON)   && \
     !defined(TIC_BUILD_WITH_WASM)
@@ -38,6 +39,7 @@
 #   define TIC_BUILD_WITH_JS       1
 #   define TIC_BUILD_WITH_WREN     1
 #   define TIC_BUILD_WITH_SCHEME   1
+#   define TIC_BUILD_WITH_ZUO      1
 #   define TIC_BUILD_WITH_SQUIRREL 1
 #   define TIC_BUILD_WITH_PYTHON   1
 #   define TIC_BUILD_WITH_WASM     1
