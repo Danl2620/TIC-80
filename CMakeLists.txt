@@ -374,14 +374,7 @@ set(ZUO_SRC
 add_library(zuo STATIC ${ZUO_SRC})
 set_target_properties(zuo PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(zuo PUBLIC ${ZUO_DIR})
-
-if (N3DS)
-    target_compile_definitions(zuo PRIVATE ZUO_N3DS)
-endif()
-
-if (BAREMETALPI)
-    target_compile_definitions(zuo PRIVATE ZUO_BAREMETALPI)
-endif()
+target_compile_definitions(zuo PRIVATE ZUO_EMBEDDED)
 
 ################################
 # SQUIRREL
@@ -616,6 +609,7 @@ macro(MACRO_CORE SCRIPT DEFINE BUILD_DEPRECATED)
         squirrel
         python
         scheme
+        zuo
         quickjs
         blipbuf
         zlib
