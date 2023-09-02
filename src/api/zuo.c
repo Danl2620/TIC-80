@@ -42,7 +42,6 @@ typedef struct {
 
     // handy functions
     zuo_ext_t* length;
-    zuo_ext_t* list_ref;
 } zuo_scheme;
 
 static int zuo_list_length(zuo_scheme* sc, zuo_ext_t* lst)
@@ -52,23 +51,17 @@ static int zuo_list_length(zuo_scheme* sc, zuo_ext_t* lst)
         length, zuo_ext_cons(lst, zuo_ext_null())));
 }
 
-static zuo_ext_t* zuo_list_ref(zuo_scheme* sc, zuo_ext_t* lst, int index)
-{
-    return zuo_ext_apply(
-        sc->list_ref, zuo_ext_cons(lst, zuo_ext_cons(zuo_ext_integer(index), zuo_ext_null())));
-}
-
 zuo_ext_t* zuo_print(zuo_scheme* sc, zuo_ext_t* args)
 {
     //print(text x=0 y=0 color=15 fixed=false scale=1 smallfont=false) -> width
     tic_mem* tic = sc->tic;
-    const char* text = zuo_ext_string_ptr(zuo_list_ref(sc, args, 0));
-    const s32 x = zuo_ext_integer_value(zuo_list_ref(sc, args, 1));
-    const s32 y = zuo_ext_integer_value(zuo_list_ref(sc, args, 2));
-    const u8 color = zuo_ext_integer_value(zuo_list_ref(sc, args, 2));
-    const bool fixed = zuo_ext_bool_value(zuo_list_ref(sc, args,4));
-    const s32 scale = zuo_ext_integer_value(zuo_list_ref(sc, args, 5));
-    const bool alt = zuo_ext_bool_value(zuo_list_ref(sc, args,6));
+    const char* text = zuo_ext_string_ptr(zuo_ext_list_ref(args, 0));
+    const s32 x = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const s32 y = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
+    const u8 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
+    const bool fixed = zuo_ext_bool_value(zuo_ext_list_ref(args,4));
+    const s32 scale = zuo_ext_integer_value(zuo_ext_list_ref(args, 5));
+    const bool alt = zuo_ext_bool_value(zuo_ext_list_ref(args,6));
     const s32 result = tic_api_print(tic, text, x, y, color, fixed, scale, alt);
     return zuo_ext_integer(result);
 }
@@ -76,7 +69,7 @@ zuo_ext_t* zuo_cls(zuo_scheme* sc, zuo_ext_t* args)
 {
     // cls(color=0)
     tic_mem* tic = sc->tic;
-    const u8 color = zuo_ext_integer_value(zuo_list_ref(sc, args, 0));
+    const u8 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
     tic_api_cls(tic, color);
     return zuo_ext_void();
 }
@@ -85,18 +78,18 @@ zuo_ext_t* zuo_pix(zuo_scheme* sc, zuo_ext_t* args)
 {
     // pix(x y color)\npix(x y) -> color
     tic_mem* tic = sc->tic;
-    const s32 x = zuo_ext_integer_value(zuo_list_ref(sc, args, 0));
-    const s32 y = zuo_ext_integer_value(zuo_list_ref(sc, args, 1));
+    const s32 x = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 y = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
 
     const int argn = zuo_list_length(sc, args);
     if (argn == 3)
     {
-        const u8 color = zuo_ext_integer_value(zuo_list_ref(sc, args, 2));
+        const u8 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
         tic_api_pix(tic, x, y, color, false);
         return zuo_ext_void();
     }
     else{
-        return zuo_ext_integer(sc, tic_api_pix(tic, x, y, 0, true));
+        return zuo_ext_integer(tic_api_pix(tic, x, y, 0, true));
     }
 }
 
@@ -104,11 +97,11 @@ zuo_ext_t* zuo_line(zuo_scheme* sc, zuo_ext_t* args)
 {
     // line(x0 y0 x1 y1 color)
     tic_mem* tic = sc->tic;
-    const s32 x0 = zuo_ext_integer_value(zuo_list_ref(sc, args,0));
-    const s32 y0 = zuo_ext_integer_value(zuo_list_ref(sc, args,1));
-    const s32 x1 = zuo_ext_integer_value(zuo_list_ref(sc, args,2));
-    const s32 y1 = zuo_ext_integer_value(zuo_list_ref(sc, args,3));
-    const u8 color = zuo_ext_integer_value(zuo_list_ref(sc, args, 4));
+    const s32 x0 = zuo_ext_integer_value(zuo_ext_list_ref(args,0));
+    const s32 y0 = zuo_ext_integer_value(zuo_ext_list_ref(args,1));
+    const s32 x1 = zuo_ext_integer_value(zuo_ext_list_ref(args,2));
+    const s32 y1 = zuo_ext_integer_value(zuo_ext_list_ref(args,3));
+    const u8 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 4));
     tic_api_line(tic, x0, y0, x1, y1, color);
     return zuo_ext_void();
 }
@@ -116,11 +109,11 @@ zuo_ext_t* zuo_rect(zuo_scheme* sc, zuo_ext_t* args)
 {
     // rect(x y w h color)
     tic_mem* tic = sc->tic;
-    const s32 x = zuo_ext_integer_value(zuo_list_ref(sc, args,0));
-    const s32 y = zuo_ext_integer_value(zuo_list_ref(sc, args,1));
-    const s32 w = zuo_ext_integer_value(zuo_list_ref(sc, args,2));
-    const s32 h = zuo_ext_integer_value(zuo_list_ref(sc, args,3));
-    const u8 color = zuo_ext_integer_value(zuo_list_ref(sc, args, 4));
+    const s32 x = zuo_ext_integer_value(zuo_ext_list_ref(args,0));
+    const s32 y = zuo_ext_integer_value(zuo_ext_list_ref(args,1));
+    const s32 w = zuo_ext_integer_value(zuo_ext_list_ref(args,2));
+    const s32 h = zuo_ext_integer_value(zuo_ext_list_ref(args,3));
+    const u8 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 4));
     tic_api_rect(tic, x, y, w, h, color);
     return zuo_ext_void();
 }
@@ -128,66 +121,67 @@ zuo_ext_t* zuo_rectb(zuo_scheme* sc, zuo_ext_t* args)
 {
     // rectb(x y w h color)
     tic_mem* tic = sc->tic;
-    const s32 x = zuo_ext_integer_value(zuo_list_ref(sc, args,0));
-    const s32 y = zuo_ext_integer_value(zuo_list_ref(sc, args,1));
-    const s32 w = zuo_ext_integer_value(zuo_list_ref(sc, args,2));
-    const s32 h = zuo_ext_integer_value(zuo_list_ref(sc, args,3));
-    const u8 color = zuo_ext_integer_value(zuo_list_ref(sc, args, 4));
+    const s32 x = zuo_ext_integer_value(zuo_ext_list_ref(args,0));
+    const s32 y = zuo_ext_integer_value(zuo_ext_list_ref(args,1));
+    const s32 w = zuo_ext_integer_value(zuo_ext_list_ref(args,2));
+    const s32 h = zuo_ext_integer_value(zuo_ext_list_ref(args,3));
+    const u8 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 4));
     tic_api_rectb(tic, x, y, w, h, color);
     return zuo_ext_void();
 }
 
-void parseTransparentColorsArg(zuo_scheme* sc, zuo_ext_t* colorkey, u8* out_transparent_colors, u8* out_count)
-{
-    *out_count = 0;
-    if (zuo_is_list(sc, colorkey))
-    {
-        const s32 arg_color_count = zuo_list_length(sc, colorkey);
-        const u8 color_count = arg_color_count < TIC_PALETTE_SIZE ? (u8)arg_color_count : TIC_PALETTE_SIZE;
-        for (u8 i=0; i<color_count; ++i)
-        {
-            zuo_ext_t* c = zuo_list_ref(sc, colorkey, i);
-            out_transparent_colors[i] = zuo_is_integer(c) ? zuo_ext_integer_value(c) : 0;
-            ++(*out_count);
-        }
-    }
-    else if (zuo_is_integer(colorkey))
-    {
-        out_transparent_colors[0] = (u8)zuo_ext_integer_value(colorkey);
-        *out_count = 1;
-    }
-}
+// void parseTransparentColorsArg(zuo_scheme* sc, zuo_ext_t* colorkey, u8* out_transparent_colors, u8* out_count)
+// {
+//     *out_count = 0;
+//     if (zuo_is_list(sc, colorkey))
+//     {
+//         const s32 arg_color_count = zuo_list_length(sc, colorkey);
+//         const u8 color_count = arg_color_count < TIC_PALETTE_SIZE ? (u8)arg_color_count : TIC_PALETTE_SIZE;
+//         for (u8 i=0; i<color_count; ++i)
+//         {
+//             zuo_ext_t* c = zuo_ext_list_ref(colorkey, i);
+//             out_transparent_colors[i] = zuo_is_integer(c) ? zuo_ext_integer_value(c) : 0;
+//             ++(*out_count);
+//         }
+//     }
+//     else if (zuo_is_integer(colorkey))
+//     {
+//         out_transparent_colors[0] = (u8)zuo_ext_integer_value(colorkey);
+//         *out_count = 1;
+//     }
+// }
 
 zuo_ext_t* zuo_spr(zuo_scheme* sc, zuo_ext_t* args)
 {
     // spr(id x y colorkey=-1 scale=1 flip=0 rotate=0 w=1 h=1)
-    const int argn      = zuo_list_length(sc, args);
-    tic_mem* tic        = (tic_mem*)getZuoCore(sc);
-    const s32 id        = zuo_ext_integer_value(zuo_car(args));
-    const s32 x         = zuo_ext_integer_value(zuo_cadr(args));
-    const s32 y         = zuo_ext_integer_value(zuo_caddr(args));
+    //const int argn      = zuo_list_length(sc, args);
+    tic_mem* tic        = sc->tic;
+    const s32 id        = zuo_ext_integer_value(zuo_ext_list_ref(args,0));
+    const s32 x         = zuo_ext_integer_value(zuo_ext_list_ref(args,1));
+    const s32 y         = zuo_ext_integer_value(zuo_ext_list_ref(args,2));
+    const u8  color     = zuo_ext_integer_value(zuo_ext_list_ref(args,3));
 
-    static u8 trans_colors[TIC_PALETTE_SIZE];
-    u8 trans_count = 0;
-    if (argn > 3)
-    {
-        zuo_ext_t* colorkey = zuo_cadddr(args);
-        parseTransparentColorsArg(sc, colorkey, trans_colors, &trans_count);
-    }
+    // static u8 trans_colors[TIC_PALETTE_SIZE];
+    // u8 trans_count = 0;
+    // if (argn > 3)
+    // {
+    //     zuo_ext_t* colorkey = zuo_ext_list_ref(args, 3);
+    //     parseTransparentColorsArg(sc, colorkey, trans_colors, &trans_count);
+    // }
 
-    const s32 scale     = argn > 4 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 4)) : 1;
-    const s32 flip      = argn > 5 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 5)) : 0;
-    const s32 rotate    = argn > 6 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 6)) : 0;
-    const s32 w         = argn > 7 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 7)) : 1;
-    const s32 h         = argn > 8 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 8)) : 1;
-    tic_api_spr(tic, id, x, y, w, h, trans_colors, trans_count, scale, (tic_flip)flip, (tic_rotate) rotate);
+    const s32 scale     = zuo_ext_integer_value(zuo_ext_list_ref(args, 4));
+    const s32 flip      = zuo_ext_integer_value(zuo_ext_list_ref(args, 5));
+    const s32 rotate    = zuo_ext_integer_value(zuo_ext_list_ref(args, 6));
+    const s32 w         = zuo_ext_integer_value(zuo_ext_list_ref(args, 7));
+    const s32 h         = zuo_ext_integer_value(zuo_ext_list_ref(args, 8));
+    tic_api_spr(tic, id, x, y, w, h, &color, 1, scale, (tic_flip)flip, (tic_rotate) rotate);
     return zuo_ext_void();
 }
 zuo_ext_t* zuo_btn(zuo_scheme* sc, zuo_ext_t* args)
 {
     // btn(id) -> pressed
     tic_mem* tic = sc->tic;
-    const s32 id = zuo_ext_integer_value(zuo_car(args));
+    const s32 id = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
 
     return zuo_make_boolean(sc, tic_api_btn(tic, id));
 }
@@ -195,12 +189,9 @@ zuo_ext_t* zuo_btnp(zuo_scheme* sc, zuo_ext_t* args)
 {
     // btnp(id hold=-1 period=-1) -> pressed
     tic_mem* tic = sc->tic;
-    const s32 id = zuo_ext_integer_value(zuo_car(args));
-
-    const int argn = zuo_list_length(sc, args);
-    const s32 hold = argn > 1 ? zuo_ext_integer_value(zuo_cadr(args)) : -1;
-    const s32 period = argn > 2 ? zuo_ext_integer_value(zuo_caddr(args)) : -1;
-
+    const s32 id = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 hold = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const s32 period = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
     return zuo_make_boolean(sc, tic_api_btnp(tic, id, hold, period));
 }
 
@@ -236,13 +227,13 @@ zuo_ext_t* zuo_sfx(zuo_scheme* sc, zuo_ext_t* args)
 {
     // sfx(id note=-1 duration=-1 channel=0 volume=15 speed=0)
     tic_mem* tic = sc->tic;
-    const s32 id = zuo_ext_integer_value(zuo_car(args));
+    const s32 id = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
 
     const int argn = zuo_list_length(sc, args);
     int note = -1;
     int octave = -1;
     if (argn > 1) {
-        zuo_ext_t* note_ptr = zuo_cadr(args);
+        zuo_ext_t* note_ptr = zuo_ext_list_ref(args, 1);
         if (zuo_is_integer(note_ptr)) {
             const s32 raw_note = zuo_ext_integer_value(note_ptr);
             if (raw_note >= 0 || raw_note <= 95) {
@@ -275,12 +266,12 @@ zuo_ext_t* zuo_sfx(zuo_scheme* sc, zuo_ext_t* args)
         }
     }
 
-    const s32 duration = argn > 2 ? zuo_ext_integer_value(zuo_caddr(args)) : -1;
-    const s32 channel = argn > 3 ? zuo_ext_integer_value(zuo_cadddr(args)) : 0;
+    const s32 duration = argn > 2 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 2)) : -1;
+    const s32 channel = argn > 3 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 3)) : 0;
 
     s32 volumes[TIC80_SAMPLE_CHANNELS] = {MAX_VOLUME, MAX_VOLUME};
     if (argn > 4) {
-        zuo_ext_t* volume_arg = zuo_list_ref(sc, args, 4);
+        zuo_ext_t* volume_arg = zuo_ext_list_ref(args, 4);
         if (zuo_is_integer(volume_arg)) {
             volumes[0] = volumes[1] = zuo_ext_integer_value(volume_arg) & 0xF;
         } else if (zuo_is_list(sc, volume_arg) && zuo_list_length(sc, volume_arg) == 2) {
@@ -288,86 +279,86 @@ zuo_ext_t* zuo_sfx(zuo_scheme* sc, zuo_ext_t* args)
             volumes[1] = zuo_ext_integer_value(zuo_cadr(volume_arg)) & 0xF;
         }
     }
-    const s32 speed = argn > 5 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 5)) : 0;
+    const s32 speed = argn > 5 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 5)) : 0;
 
     tic_api_sfx(tic, id, note, octave, duration, channel, volumes[0], volumes[1], speed);
     return zuo_ext_void();
 }
 
-typedef struct
-{
-    zuo_scheme* sc;
-    zuo_ext_t* callback;
-} RemapData;
+// typedef struct
+// {
+//     zuo_scheme* sc;
+//     zuo_ext_t* callback;
+// } RemapData;
 
-static void remapCallback(void* data, s32 x, s32 y, RemapResult* result)
-{
-    RemapData* remap = (RemapData*)data;
-    zuo_scheme* sc = remap->sc;
+// static void remapCallback(void* data, s32 x, s32 y, RemapResult* result)
+// {
+//     RemapData* remap = (RemapData*)data;
+//     zuo_scheme* sc = remap->sc;
 
-    // (callback index x y) -> (list index flip rotate)
-    zuo_ext_t* callbackResult = zuo_call(sc, remap->callback,
-                                        zuo_cons(sc, zuo_ext_integer(sc, result->index),
-                                                zuo_cons(sc, zuo_ext_integer(sc, x),
-                                                        zuo_cons(sc, zuo_ext_integer(sc, y),
-                                                                zuo_ext_void()))));
+//     // (callback index x y) -> (list index flip rotate)
+//     zuo_ext_t* callbackResult = zuo_call(sc, remap->callback,
+//                                         zuo_cons(sc, zuo_ext_integer(result->index),
+//                                                 zuo_cons(sc, zuo_ext_integer(x),
+//                                                         zuo_cons(sc, zuo_ext_integer(y),
+//                                                                 zuo_ext_void()))));
 
-    if (zuo_is_list(sc, callbackResult) && zuo_list_length(sc, callbackResult) == 3)
-    {
-        result->index = zuo_ext_integer_value(zuo_car(callbackResult));
-        result->flip = (tic_flip)zuo_ext_integer_value(zuo_cadr(callbackResult));
-        result->rotate = (tic_rotate)zuo_ext_integer_value(zuo_caddr(callbackResult));
-    }
-}
+//     if (zuo_is_list(sc, callbackResult) && zuo_list_length(sc, callbackResult) == 3)
+//     {
+//         result->index = zuo_ext_integer_value(zuo_car(callbackResult));
+//         result->flip = (tic_flip)zuo_ext_integer_value(zuo_cadr(callbackResult));
+//         result->rotate = (tic_rotate)zuo_ext_integer_value(zuo_caddr(callbackResult));
+//     }
+// }
 
 zuo_ext_t* zuo_map(zuo_scheme* sc, zuo_ext_t* args)
 {
     // map(x=0 y=0 w=30 h=17 sx=0 sy=0 colorkey=-1 scale=1 remap=nil)
     tic_mem* tic = sc->tic;
-    const s32 x = zuo_ext_integer_value(zuo_car(args));
-    const s32 y = zuo_ext_integer_value(zuo_cadr(args));
-    const s32 w = zuo_ext_integer_value(zuo_caddr(args));
-    const s32 h = zuo_ext_integer_value(zuo_cadddr(args));
-    const s32 sx = zuo_ext_integer_value(zuo_list_ref(sc, args, 4));
-    const s32 sy = zuo_ext_integer_value(zuo_list_ref(sc, args, 5));
+    const s32 x = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 y = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const s32 w = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
+    const s32 h = zuo_ext_integer_value(zuo_ext_list_ref(args, 3));
+    const s32 sx = zuo_ext_integer_value(zuo_ext_list_ref(args, 4));
+    const s32 sy = zuo_ext_integer_value(zuo_ext_list_ref(args, 5));
+    const u8 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 6));
 
-    const int argn = zuo_list_length(sc, args);
 
-    static u8 trans_colors[TIC_PALETTE_SIZE];
-    u8 trans_count = 0;
-    if (argn > 6) {
-        zuo_ext_t* colorkey = zuo_list_ref(sc, args, 6);
-        parseTransparentColorsArg(sc, colorkey, trans_colors, &trans_count);
-    }
+    // static u8 trans_colors[TIC_PALETTE_SIZE];
+    // u8 trans_count = 0;
+    // if (argn > 6) {
+    //     zuo_ext_t* colorkey = zuo_ext_list_ref(args, 6);
+    //     parseTransparentColorsArg(sc, colorkey, trans_colors, &trans_count);
+    // }
 
-    const s32 scale = argn > 7 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 7)) : 1;
+    const s32 scale = zuo_ext_integer_value(zuo_ext_list_ref(args, 7));
 
-    RemapFunc remap = NULL;
-    RemapData data;
-    if (argn > 8)
-    {
-        remap = remapCallback;
-        data.sc = sc;
-        data.callback = zuo_list_ref(sc, args, 8);
-    }
-    tic_api_map(tic, x, y, w, h, sx, sy, trans_colors, trans_count, scale, remap, &data);
+    // RemapFunc remap = NULL;
+    // RemapData data;
+    // if (argn > 8)
+    // {
+    //     remap = remapCallback;
+    //     data.sc = sc;
+    //     data.callback = zuo_ext_list_ref(args, 8);
+    // }
+    tic_api_map(tic, x, y, w, h, sx, sy, color, 1, scale, 0, 0);
     return zuo_ext_void();
 }
 zuo_ext_t* zuo_mget(zuo_scheme* sc, zuo_ext_t* args)
 {
     // mget(x y) -> tile_id
     tic_mem* tic = sc->tic;
-    const s32 x = zuo_ext_integer_value(zuo_car(args));
-    const s32 y = zuo_ext_integer_value(zuo_cadr(args));
-    return zuo_ext_integer(sc, tic_api_mget(tic, x, y));
+    const s32 x = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 y = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    return zuo_ext_integer(tic_api_mget(tic, x, y));
 }
 zuo_ext_t* zuo_mset(zuo_scheme* sc, zuo_ext_t* args)
 {
     // mset(x y tile_id)
     tic_mem* tic = sc->tic;
-    const s32 x = zuo_ext_integer_value(zuo_car(args));
-    const s32 y = zuo_ext_integer_value(zuo_cadr(args));
-    const u8 tile_id = zuo_ext_integer_value(zuo_caddr(args));
+    const s32 x = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 y = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const u8 tile_id = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
     tic_api_mset(tic, x, y, tile_id);
     return zuo_ext_void();
 }
@@ -375,19 +366,19 @@ zuo_ext_t* zuo_peek(zuo_scheme* sc, zuo_ext_t* args)
 {
     // peek(addr bits=8) -> value
     tic_mem* tic = sc->tic;
-    const s32 addr = zuo_ext_integer_value(zuo_car(args));
+    const s32 addr = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
     const int argn = zuo_list_length(sc, args);
-    const s32 bits = argn > 1 ? zuo_ext_integer_value(zuo_cadr(args)) : 8;
-    return zuo_ext_integer(sc, tic_api_peek(tic, addr, bits));
+    const s32 bits = argn > 1 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 1)) : 8;
+    return zuo_ext_integer(tic_api_peek(tic, addr, bits));
 }
 zuo_ext_t* zuo_poke(zuo_scheme* sc, zuo_ext_t* args)
 {
     // poke(addr value bits=8)
     tic_mem* tic = sc->tic;
-    const s32 addr = zuo_ext_integer_value(zuo_car(args));
-    const s32 value = zuo_ext_integer_value(zuo_cadr(args));
+    const s32 addr = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 value = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
     const int argn = zuo_list_length(sc, args);
-    const s32 bits = argn > 2 ? zuo_ext_integer_value(zuo_caddr(args)) : 8;
+    const s32 bits = argn > 2 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 2)) : 8;
     tic_api_poke(tic, addr, value, bits);
     return zuo_ext_void();
 }
@@ -395,15 +386,15 @@ zuo_ext_t* zuo_peek1(zuo_scheme* sc, zuo_ext_t* args)
 {
     // peek1(addr) -> value
     tic_mem* tic = sc->tic;
-    const s32 addr = zuo_ext_integer_value(zuo_car(args));
-    return zuo_ext_integer(sc, tic_api_peek1(tic, addr));
+    const s32 addr = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    return zuo_ext_integer(tic_api_peek1(tic, addr));
 }
 zuo_ext_t* zuo_poke1(zuo_scheme* sc, zuo_ext_t* args)
 {
     // poke1(addr value)
     tic_mem* tic = sc->tic;
-    const s32 addr = zuo_ext_integer_value(zuo_car(args));
-    const s32 value = zuo_ext_integer_value(zuo_cadr(args));
+    const s32 addr = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 value = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
     tic_api_poke1(tic, addr, value);
     return zuo_ext_void();
 }
@@ -411,15 +402,15 @@ zuo_ext_t* zuo_peek2(zuo_scheme* sc, zuo_ext_t* args)
 {
     // peek2(addr) -> value
     tic_mem* tic = sc->tic;
-    const s32 addr = zuo_ext_integer_value(zuo_car(args));
-    return zuo_ext_integer(sc, tic_api_peek2(tic, addr));
+    const s32 addr = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    return zuo_ext_integer(tic_api_peek2(tic, addr));
 }
 zuo_ext_t* zuo_poke2(zuo_scheme* sc, zuo_ext_t* args)
 {
     // poke2(addr value)
     tic_mem* tic = sc->tic;
-    const s32 addr = zuo_ext_integer_value(zuo_car(args));
-    const s32 value = zuo_ext_integer_value(zuo_cadr(args));
+    const s32 addr = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 value = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
     tic_api_poke2(tic, addr, value);
     return zuo_ext_void();
 }
@@ -427,15 +418,15 @@ zuo_ext_t* zuo_peek4(zuo_scheme* sc, zuo_ext_t* args)
 {
     // peek4(addr) -> value
     tic_mem* tic = sc->tic;
-    const s32 addr = zuo_ext_integer_value(zuo_car(args));
-    return zuo_ext_integer(sc, tic_api_peek4(tic, addr));
+    const s32 addr = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    return zuo_ext_integer(tic_api_peek4(tic, addr));
 }
 zuo_ext_t* zuo_poke4(zuo_scheme* sc, zuo_ext_t* args)
 {
     // poke4(addr value)
     tic_mem* tic = sc->tic;
-    const s32 addr = zuo_ext_integer_value(zuo_car(args));
-    const s32 value = zuo_ext_integer_value(zuo_cadr(args));
+    const s32 addr = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 value = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
     tic_api_poke4(tic, addr, value);
     return zuo_ext_void();
 }
@@ -443,9 +434,9 @@ zuo_ext_t* zuo_memcpy(zuo_scheme* sc, zuo_ext_t* args)
 {
     // memcpy(dest source size)
     tic_mem* tic = sc->tic;
-    const s32 dest = zuo_ext_integer_value(zuo_car(args));
-    const s32 source = zuo_ext_integer_value(zuo_cadr(args));
-    const s32 size = zuo_ext_integer_value(zuo_caddr(args));
+    const s32 dest = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 source = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const s32 size = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
     tic_api_memcpy(tic, dest, source, size);
     return zuo_ext_void();
 }
@@ -453,9 +444,9 @@ zuo_ext_t* zuo_memset(zuo_scheme* sc, zuo_ext_t* args)
 {
     // memset(dest value size)
     tic_mem* tic = sc->tic;
-    const s32 dest = zuo_ext_integer_value(zuo_car(args));
-    const s32 value = zuo_ext_integer_value(zuo_cadr(args));
-    const s32 size = zuo_ext_integer_value(zuo_caddr(args));
+    const s32 dest = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 value = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const s32 size = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
     tic_api_memset(tic, dest, value, size);
     return zuo_ext_void();
 }
@@ -463,9 +454,9 @@ zuo_ext_t* zuo_trace(zuo_scheme* sc, zuo_ext_t* args)
 {
     // trace(message color=15)
     tic_mem* tic = sc->tic;
-    const char* msg = zuo_string(zuo_car(args));
+    const char* msg = zuo_string(zuo_ext_list_ref(args, 0));
     const int argn = zuo_list_length(sc, args);
-    const s32 color = argn > 1 ? zuo_ext_integer_value(zuo_cadr(args)) : 15;
+    const s32 color = argn > 1 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 1)) : 15;
     tic_api_trace(tic, msg, color);
     return zuo_ext_void();
 }
@@ -474,16 +465,16 @@ zuo_ext_t* zuo_pmem(zuo_scheme* sc, zuo_ext_t* args)
     // pmem(index value)
     // pmem(index) -> value
     tic_mem* tic = sc->tic;
-    const s32 index = zuo_ext_integer_value(zuo_car(args));
+    const s32 index = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
     const int argn = zuo_list_length(sc, args);
     s32 value = 0;
     bool shouldSet = false;
     if (argn > 1)
     {
-        value = zuo_ext_integer_value(zuo_cadr(args));
+        value = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
         shouldSet = true;
     }
-    return zuo_ext_integer(sc, (s32)tic_api_pmem(tic, index, value, shouldSet));
+    return zuo_ext_integer((s32)tic_api_pmem(tic, index, value, shouldSet));
 }
 zuo_ext_t* zuo_time(zuo_scheme* sc, zuo_ext_t* args)
 {
@@ -495,7 +486,7 @@ zuo_ext_t* zuo_tstamp(zuo_scheme* sc, zuo_ext_t* args)
 {
     // tstamp() -> timestamp
     tic_mem* tic = sc->tic;
-    return zuo_ext_integer(sc, tic_api_tstamp(tic));
+    return zuo_ext_integer(tic_api_tstamp(tic));
 }
 zuo_ext_t* zuo_exit(zuo_scheme* sc, zuo_ext_t* args)
 {
@@ -508,23 +499,24 @@ zuo_ext_t* zuo_font(zuo_scheme* sc, zuo_ext_t* args)
 {
     // font(text x y chromakey char_width char_height fixed=false scale=1 alt=false) -> width
     tic_mem* tic = sc->tic;
-    const char* text = zuo_string(zuo_car(args));
-    const s32 x = zuo_ext_integer_value(zuo_cadr(args));
-    const s32 y = zuo_ext_integer_value(zuo_caddr(args));
+    const char* text = zuo_string(zuo_ext_list_ref(args, 0));
+    const s32 x = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const s32 y = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
+    const u8 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 3));
 
-    static u8 trans_colors[TIC_PALETTE_SIZE];
-    u8 trans_count = 0;
-    zuo_ext_t* colorkey = zuo_cadddr(args);
-    parseTransparentColorsArg(sc, colorkey, trans_colors, &trans_count);
+    // static u8 trans_colors[TIC_PALETTE_SIZE];
+    // u8 trans_count = 0;
+    // zuo_ext_t* colorkey = zuo_ext_list_ref(args, 3);
+    // parseTransparentColorsArg(sc, colorkey, trans_colors, &trans_count);
 
-    const s32 w = zuo_ext_integer_value(zuo_list_ref(sc, args, 4));
-    const s32 h = zuo_ext_integer_value(zuo_list_ref(sc, args, 5));
-    const int argn = zuo_list_length(sc, args);
-    const s32 fixed = argn > 6 ? zuo_boolean(sc, zuo_list_ref(sc, args, 6)) : false;
-    const s32 scale = argn > 7 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 7)) : 1;
-    const s32 alt = argn > 8 ? zuo_boolean(sc, zuo_list_ref(sc, args, 8)) : false;
+    const s32 w = zuo_ext_integer_value(zuo_ext_list_ref(args, 4));
+    const s32 h = zuo_ext_integer_value(zuo_ext_list_ref(args, 5));
+    //const int argn = zuo_list_length(sc, args);
+    const s32 fixed = zuo_boolean(sc, zuo_ext_list_ref(args, 6));
+    const s32 scale = zuo_ext_integer_value(zuo_ext_list_ref(args, 7));
+    const s32 alt = zuo_boolean(sc, zuo_ext_list_ref(args, 8));
 
-    return zuo_ext_integer(sc, tic_api_font(tic, text, x, y, trans_colors, trans_count, w, h, fixed, scale, alt));
+    return zuo_ext_integer(tic_api_font(tic, text, x, y, color, 1, w, h, fixed, scale, alt));
 }
 zuo_ext_t* zuo_mouse(zuo_scheme* sc, zuo_ext_t* args)
 {
@@ -534,23 +526,23 @@ zuo_ext_t* zuo_mouse(zuo_scheme* sc, zuo_ext_t* args)
     const tic80_mouse* mouse = &((tic_core*)tic)->memory.ram->input.mouse;
 
     return
-        zuo_cons(sc, zuo_ext_integer(sc, point.x),
-                zuo_cons(sc, zuo_ext_integer(sc, point.y),
-                        zuo_cons(sc, zuo_ext_integer(sc, mouse->left),
-                                zuo_cons(sc, zuo_ext_integer(sc, mouse->middle),
-                                        zuo_cons(sc, zuo_ext_integer(sc, mouse->right),
-                                                zuo_cons(sc, zuo_ext_integer(sc, mouse->scrollx),
-                                                        zuo_cons(sc, zuo_ext_integer(sc, mouse->scrolly),
+        zuo_cons(sc, zuo_ext_integer(point.x),
+                zuo_cons(sc, zuo_ext_integer(point.y),
+                        zuo_cons(sc, zuo_ext_integer(mouse->left),
+                                zuo_cons(sc, zuo_ext_integer(mouse->middle),
+                                        zuo_cons(sc, zuo_ext_integer(mouse->right),
+                                                zuo_cons(sc, zuo_ext_integer(mouse->scrollx),
+                                                        zuo_cons(sc, zuo_ext_integer(mouse->scrolly),
                                                                 zuo_ext_void())))))));
 }
 zuo_ext_t* zuo_circ(zuo_scheme* sc, zuo_ext_t* args)
 {
     // circ(x y radius color)
     tic_mem* tic = sc->tic;
-    const s32 x = zuo_ext_integer_value(zuo_car(args));
-    const s32 y = zuo_ext_integer_value(zuo_cadr(args));
-    const s32 radius = zuo_ext_integer_value(zuo_caddr(args));
-    const s32 color = zuo_ext_integer_value(zuo_cadddr(args));
+    const s32 x = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 y = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const s32 radius = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
+    const s32 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 3));
     tic_api_circ(tic, x, y, radius, color);
     return zuo_ext_void();
 }
@@ -558,10 +550,10 @@ zuo_ext_t* zuo_circb(zuo_scheme* sc, zuo_ext_t* args)
 {
     // circb(x y radius color)
     tic_mem* tic = sc->tic;
-    const s32 x = zuo_ext_integer_value(zuo_car(args));
-    const s32 y = zuo_ext_integer_value(zuo_cadr(args));
-    const s32 radius = zuo_ext_integer_value(zuo_caddr(args));
-    const s32 color = zuo_ext_integer_value(zuo_cadddr(args));
+    const s32 x = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 y = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const s32 radius = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
+    const s32 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 3));
     tic_api_circb(tic, x, y, radius, color);
     return zuo_ext_void();
 }
@@ -569,11 +561,11 @@ zuo_ext_t* zuo_elli(zuo_scheme* sc, zuo_ext_t* args)
 {
     // elli(x y a b color)
     tic_mem* tic = sc->tic;
-    const s32 x = zuo_ext_integer_value(zuo_car(args));
-    const s32 y = zuo_ext_integer_value(zuo_cadr(args));
-    const s32 a = zuo_ext_integer_value(zuo_caddr(args));
-    const s32 b = zuo_ext_integer_value(zuo_cadddr(args));
-    const s32 color = zuo_ext_integer_value(zuo_list_ref(sc, args, 4));
+    const s32 x = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 y = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const s32 a = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
+    const s32 b = zuo_ext_integer_value(zuo_ext_list_ref(args, 3));
+    const s32 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 4));
     tic_api_elli(tic, x, y, a, b, color);
     return zuo_ext_void();
 }
@@ -581,11 +573,11 @@ zuo_ext_t* zuo_ellib(zuo_scheme* sc, zuo_ext_t* args)
 {
     // ellib(x y a b color)
     tic_mem* tic = sc->tic;
-    const s32 x = zuo_ext_integer_value(zuo_car(args));
-    const s32 y = zuo_ext_integer_value(zuo_cadr(args));
-    const s32 a = zuo_ext_integer_value(zuo_caddr(args));
-    const s32 b = zuo_ext_integer_value(zuo_cadddr(args));
-    const s32 color = zuo_ext_integer_value(zuo_list_ref(sc, args, 4));
+    const s32 x = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 y = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const s32 a = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
+    const s32 b = zuo_ext_integer_value(zuo_ext_list_ref(args, 3));
+    const s32 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 4));
     tic_api_ellib(tic, x, y, a, b, color);
     return zuo_ext_void();
 }
@@ -593,13 +585,13 @@ zuo_ext_t* zuo_tri(zuo_scheme* sc, zuo_ext_t* args)
 {
     // tri(x1 y1 x2 y2 x3 y3 color)
     tic_mem* tic = sc->tic;
-    const s32 x1 = zuo_ext_integer_value(zuo_car(args));
-    const s32 y1 = zuo_ext_integer_value(zuo_cadr(args));
-    const s32 x2 = zuo_ext_integer_value(zuo_caddr(args));
-    const s32 y2 = zuo_ext_integer_value(zuo_cadddr(args));
-    const s32 x3 = zuo_ext_integer_value(zuo_list_ref(sc, args, 4));
-    const s32 y3 = zuo_ext_integer_value(zuo_list_ref(sc, args, 5));
-    const s32 color = zuo_ext_integer_value(zuo_list_ref(sc, args, 6));
+    const s32 x1 = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 y1 = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const s32 x2 = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
+    const s32 y2 = zuo_ext_integer_value(zuo_ext_list_ref(args, 3));
+    const s32 x3 = zuo_ext_integer_value(zuo_ext_list_ref(args, 4));
+    const s32 y3 = zuo_ext_integer_value(zuo_ext_list_ref(args, 5));
+    const s32 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 6));
     tic_api_tri(tic, x1, y1, x2, y2, x3, y3, color);
     return zuo_ext_void();
 }
@@ -607,13 +599,13 @@ zuo_ext_t* zuo_trib(zuo_scheme* sc, zuo_ext_t* args)
 {
     // trib(x1 y1 x2 y2 x3 y3 color)
     tic_mem* tic = sc->tic;
-    const s32 x1 = zuo_ext_integer_value(zuo_car(args));
-    const s32 y1 = zuo_ext_integer_value(zuo_cadr(args));
-    const s32 x2 = zuo_ext_integer_value(zuo_caddr(args));
-    const s32 y2 = zuo_ext_integer_value(zuo_cadddr(args));
-    const s32 x3 = zuo_ext_integer_value(zuo_list_ref(sc, args, 4));
-    const s32 y3 = zuo_ext_integer_value(zuo_list_ref(sc, args, 5));
-    const s32 color = zuo_ext_integer_value(zuo_list_ref(sc, args, 6));
+    const s32 x1 = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 y1 = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const s32 x2 = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
+    const s32 y2 = zuo_ext_integer_value(zuo_ext_list_ref(args, 3));
+    const s32 x3 = zuo_ext_integer_value(zuo_ext_list_ref(args, 4));
+    const s32 y3 = zuo_ext_integer_value(zuo_ext_list_ref(args, 5));
+    const s32 color = zuo_ext_integer_value(zuo_ext_list_ref(args, 6));
     tic_api_trib(tic, x1, y1, x2, y2, x3, y3, color);
     return zuo_ext_void();
 }
@@ -621,35 +613,35 @@ zuo_ext_t* zuo_ttri(zuo_scheme* sc, zuo_ext_t* args)
 {
     // ttri(x1 y1 x2 y2 x3 y3 u1 v1 u2 v2 u3 v3 texsrc=0 chromakey=-1 z1=0 z2=0 z3=0)
     tic_mem* tic = sc->tic;
-    const s32 x1 = zuo_ext_integer_value(zuo_car(args));
-    const s32 y1 = zuo_ext_integer_value(zuo_cadr(args));
-    const s32 x2 = zuo_ext_integer_value(zuo_caddr(args));
-    const s32 y2 = zuo_ext_integer_value(zuo_cadddr(args));
-    const s32 x3 = zuo_ext_integer_value(zuo_list_ref(sc, args, 4));
-    const s32 y3 = zuo_ext_integer_value(zuo_list_ref(sc, args, 5));
-    const s32 u1 = zuo_ext_integer_value(zuo_list_ref(sc, args, 6));
-    const s32 v1 = zuo_ext_integer_value(zuo_list_ref(sc, args, 7));
-    const s32 u2 = zuo_ext_integer_value(zuo_list_ref(sc, args, 8));
-    const s32 v2 = zuo_ext_integer_value(zuo_list_ref(sc, args, 9));
-    const s32 u3 = zuo_ext_integer_value(zuo_list_ref(sc, args, 10));
-    const s32 v3 = zuo_ext_integer_value(zuo_list_ref(sc, args, 11));
+    const s32 x1 = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const s32 y1 = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const s32 x2 = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
+    const s32 y2 = zuo_ext_integer_value(zuo_ext_list_ref(args, 3));
+    const s32 x3 = zuo_ext_integer_value(zuo_ext_list_ref(args, 4));
+    const s32 y3 = zuo_ext_integer_value(zuo_ext_list_ref(args, 5));
+    const s32 u1 = zuo_ext_integer_value(zuo_ext_list_ref(args, 6));
+    const s32 v1 = zuo_ext_integer_value(zuo_ext_list_ref(args, 7));
+    const s32 u2 = zuo_ext_integer_value(zuo_ext_list_ref(args, 8));
+    const s32 v2 = zuo_ext_integer_value(zuo_ext_list_ref(args, 9));
+    const s32 u3 = zuo_ext_integer_value(zuo_ext_list_ref(args, 10));
+    const s32 v3 = zuo_ext_integer_value(zuo_ext_list_ref(args, 11));
 
     const int argn = zuo_list_length(sc, args);
-    const tic_texture_src texsrc = (tic_texture_src)(argn > 12 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 12)) : 0);
+    const tic_texture_src texsrc = (tic_texture_src)(argn > 12 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 12)) : 0);
 
     static u8 trans_colors[TIC_PALETTE_SIZE];
     u8 trans_count = 0;
 
     if (argn > 13)
     {
-        zuo_ext_t* colorkey = zuo_list_ref(sc, args, 13);
+        zuo_ext_t* colorkey = zuo_ext_list_ref(args, 13);
         parseTransparentColorsArg(sc, colorkey, trans_colors, &trans_count);
     }
 
     bool depth = argn > 14 ? true : false;
-    const s32 z1 = argn > 14 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 14)) : 0;
-    const s32 z2 = argn > 15 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 15)) : 0;
-    const s32 z3 = argn > 16 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 16)) : 0;
+    const s32 z1 = argn > 14 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 14)) : 0;
+    const s32 z2 = argn > 15 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 15)) : 0;
+    const s32 z3 = argn > 16 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 16)) : 0;
 
     tic_api_ttri(tic, x1, y1, x2, y2, x3, y3, u1, v1, u2, v2, u3, v3, texsrc, trans_colors, trans_count, z1, z2, z3, depth);
     return zuo_ext_void();
@@ -663,10 +655,10 @@ zuo_ext_t* zuo_clip(zuo_scheme* sc, zuo_ext_t* args)
     if (argn != 4) {
         tic_api_clip(tic, 0, 0, TIC80_WIDTH, TIC80_HEIGHT);
     } else {
-        const s32 x = zuo_ext_integer_value(zuo_car(args));
-        const s32 y = zuo_ext_integer_value(zuo_cadr(args));
-        const s32 w = zuo_ext_integer_value(zuo_caddr(args));
-        const s32 h = zuo_ext_integer_value(zuo_cadddr(args));
+        const s32 x = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+        const s32 y = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+        const s32 w = zuo_ext_integer_value(zuo_ext_list_ref(args, 2));
+        const s32 h = zuo_ext_integer_value(zuo_ext_list_ref(args, 3));
         tic_api_clip(tic, x, y, w, h);
     }
     return zuo_ext_void();
@@ -676,13 +668,13 @@ zuo_ext_t* zuo_music(zuo_scheme* sc, zuo_ext_t* args)
     // music(track=-1 frame=-1 row=-1 loop=true sustain=false tempo=-1 speed=-1)
     tic_mem* tic = sc->tic;
     const int argn = zuo_list_length(sc, args);
-    const s32 track = argn > 0 ? zuo_ext_integer_value(zuo_car(args)) : -1;
-    const s32 frame = argn > 1 ? zuo_ext_integer_value(zuo_cadr(args)) : -1;
-    const s32 row = argn > 2 ? zuo_ext_integer_value(zuo_caddr(args)) : -1;
-    const bool loop = argn > 3 ? zuo_boolean(sc, zuo_cadddr(args)) : true;
-    const bool sustain = argn > 4 ? zuo_boolean(sc, zuo_list_ref(sc, args, 4)) : false;
-    const s32 tempo = argn > 5 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 5)) : -1;
-    const s32 speed = argn > 6 ? zuo_ext_integer_value(zuo_list_ref(sc, args, 6)) : -1;
+    const s32 track = argn > 0 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 0)) : -1;
+    const s32 frame = argn > 1 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 1)) : -1;
+    const s32 row = argn > 2 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 2)) : -1;
+    const bool loop = argn > 3 ? zuo_boolean(sc, zuo_ext_list_ref(args, 3)) : true;
+    const bool sustain = argn > 4 ? zuo_boolean(sc, zuo_ext_list_ref(args, 4)) : false;
+    const s32 tempo = argn > 5 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 5)) : -1;
+    const s32 speed = argn > 6 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 6)) : -1;
     tic_api_music(tic, track, frame, row, loop, sustain, tempo, speed);
     return zuo_ext_void();
 }
@@ -691,9 +683,9 @@ zuo_ext_t* zuo_sync(zuo_scheme* sc, zuo_ext_t* args)
     // sync(mask=0 bank=0 tocart=false)
     tic_mem* tic = sc->tic;
     const int argn = zuo_list_length(sc, args);
-    const u32 mask = argn > 0 ? (u32)zuo_ext_integer_value(zuo_car(args)) : 0;
-    const s32 bank = argn > 1 ? zuo_ext_integer_value(zuo_cadr(args)) : 0;
-    const bool tocart = argn > 2 ? zuo_boolean(sc, zuo_caddr(args)) : false;
+    const u32 mask = argn > 0 ? (u32)zuo_ext_integer_value(zuo_ext_list_ref(args, 0)) : 0;
+    const s32 bank = argn > 1 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 1)) : 0;
+    const bool tocart = argn > 2 ? zuo_boolean(sc, zuo_ext_list_ref(args, 2)) : false;
     tic_api_sync(tic, mask, bank, tocart);
     return zuo_ext_void();
 }
@@ -706,10 +698,10 @@ zuo_ext_t* zuo_vbank(zuo_scheme* sc, zuo_ext_t* args)
 
     const s32 prev = ((tic_core*)tic)->state.vbank.id;
     if (argn == 1) {
-        const s32 bank = zuo_ext_integer_value(zuo_car(args));
+        const s32 bank = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
         tic_api_vbank(tic, bank);
     }
-    return zuo_ext_integer(sc, prev);
+    return zuo_ext_integer(prev);
 }
 zuo_ext_t* zuo_reset(zuo_scheme* sc, zuo_ext_t* args)
 {
@@ -723,7 +715,7 @@ zuo_ext_t* zuo_key(zuo_scheme* sc, zuo_ext_t* args)
     //key(code=-1) -> pressed
     tic_mem* tic = sc->tic;
     const int argn = zuo_list_length(sc, args);
-    const tic_key code = argn > 0 ? zuo_ext_integer_value(zuo_car(args)) : -1;
+    const tic_key code = argn > 0 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 0)) : -1;
     return zuo_make_boolean(sc, tic_api_key(tic, code));
 }
 zuo_ext_t* zuo_keyp(zuo_scheme* sc, zuo_ext_t* args)
@@ -731,26 +723,26 @@ zuo_ext_t* zuo_keyp(zuo_scheme* sc, zuo_ext_t* args)
     // keyp(code=-1 hold=-1 period=-1) -> pressed
     tic_mem* tic = sc->tic;
     const int argn = zuo_list_length(sc, args);
-    const tic_key code = argn > 0 ? zuo_ext_integer_value(zuo_car(args)) : -1;
-    const s32 hold = argn > 1 ? zuo_ext_integer_value(zuo_cadr(args)) : -1;
-    const s32 period = argn > 2 ? zuo_ext_integer_value(zuo_caddr(args)) : -1;
+    const tic_key code = argn > 0 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 0)) : -1;
+    const s32 hold = argn > 1 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 1)) : -1;
+    const s32 period = argn > 2 ? zuo_ext_integer_value(zuo_ext_list_ref(args, 2)) : -1;
     return zuo_make_boolean(sc, tic_api_keyp(tic, code, hold, period));
 }
 zuo_ext_t* zuo_fget(zuo_scheme* sc, zuo_ext_t* args)
 {
     // fget(sprite_id flag) -> bool
     tic_mem* tic = sc->tic;
-    const s32 sprite_id = zuo_ext_integer_value(zuo_car(args));
-    const u8 flag = zuo_ext_integer_value(zuo_cadr(args));
+    const s32 sprite_id = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const u8 flag = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
     return zuo_make_boolean(sc, tic_api_fget(tic, sprite_id, flag));
 }
 zuo_ext_t* zuo_fset(zuo_scheme* sc, zuo_ext_t* args)
 {
     // fset(sprite_id flag bool)
     tic_mem* tic = sc->tic;
-    const s32 sprite_id = zuo_ext_integer_value(zuo_car(args));
-    const u8 flag = zuo_ext_integer_value(zuo_cadr(args));
-    const bool val = zuo_boolean(sc, zuo_caddr(args));
+    const s32 sprite_id = zuo_ext_integer_value(zuo_ext_list_ref(args, 0));
+    const u8 flag = zuo_ext_integer_value(zuo_ext_list_ref(args, 1));
+    const bool val = zuo_boolean(sc, zuo_ext_list_ref(args, 2));
     tic_api_fset(tic, sprite_id, flag, val);
     return zuo_ext_void();
 }
@@ -771,7 +763,7 @@ zuo_ext_t* zuo_error_handler(zuo_scheme* sc, zuo_ext_t* args)
 {
     tic_core* tic = getZuoCore(sc);
     if (tic->data) {
-        tic->data->error(tic->data->data, zuo_string(zuo_car(args)));
+        tic->data->error(tic->data->data, zuo_string(zuo_ext_list_ref(args, 0)));
     }
     return zuo_ext_void();
 }
@@ -899,7 +891,7 @@ static void callZuoScanline(tic_mem* tic, s32 row, void* data)
     static const char* scnFnName = "SCN";
     const bool isScnDefined = zuo_is_defined(sc, scnFnName);
     if (isScnDefined) {
-        zuo_call(sc, zuo_name_to_value(sc, scnFnName), zuo_cons(sc, zuo_ext_integer(sc, row), zuo_ext_void()));
+        zuo_call(sc, zuo_name_to_value(sc, scnFnName), zuo_cons(sc, zuo_ext_integer(row), zuo_ext_void()));
     }
 }
 
@@ -911,7 +903,7 @@ static void callZuoBorder(tic_mem* tic, s32 row, void* data)
     static const char* bdrFnName = "BDR";
     bool isBdrDefined = zuo_is_defined(sc, bdrFnName);
     if (isBdrDefined) {
-        zuo_call(sc, zuo_name_to_value(sc, bdrFnName), zuo_cons(sc, zuo_ext_integer(sc, row), zuo_ext_void()));
+        zuo_call(sc, zuo_name_to_value(sc, bdrFnName), zuo_cons(sc, zuo_ext_integer(row), zuo_ext_void()));
     }
 }
 
@@ -923,7 +915,7 @@ static void callZuoMenu(tic_mem* tic, s32 index, void* data)
     static const char* menuFnName = "MENU";
     bool isMenuDefined = zuo_is_defined(sc, menuFnName);
     if (isMenuDefined) {
-        zuo_call(sc, zuo_name_to_value(sc, menuFnName), zuo_cons(sc, zuo_ext_integer(sc, index), zuo_ext_void()));
+        zuo_call(sc, zuo_name_to_value(sc, menuFnName), zuo_cons(sc, zuo_ext_integer(index), zuo_ext_void()));
     }
 }
 
